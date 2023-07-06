@@ -1,0 +1,59 @@
+﻿@page "/"
+@using GameOfLife.Models
+
+@if (null != this.World)
+{
+    <div id="game-container">
+        <div id="heder">
+            <h1>Game of Life</h1>
+        </div>
+
+        <div id="gamne">
+            @for (var y = 0; y != this.World.CurrentState.GetLength(1); ++y)
+            {
+                <div class="row">
+                    @for (var x = 0; x != this.World.CurrentState.GetLength(0); ++x)
+                    {
+                        var x1 = x; var y1 = y;
+
+                        <div class="cell @(this.World.CurrentState[x, y] ? "alive" : "")">
+                            &nbsp;
+                        </div>
+                    }
+                </div>
+            }
+        </div>
+        <div id="footer">
+            <p>
+                <button @onclick="TogglePause">@(this.World.Paused ? "Play" : "Pause")</button>
+            </p>
+        </div>
+    </div>
+}
+
+@code 
+{
+    [Inject]
+    public Game World { get; set; }
+
+    protected override void OnInitialized()
+    {
+        World.OnChangeAsync += Refresh;
+        World.Run();
+    }
+
+    private void TogglePause(MouseEventArgs e)
+    {
+        this.World.TogglePaused();
+    }
+
+    private async Task Refresh()
+    {
+        await InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        World.OnChangeAsync -= Refresh;
+    }
+}
