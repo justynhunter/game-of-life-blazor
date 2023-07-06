@@ -3,6 +3,7 @@
     flex-direction: column;
     align-items: center;
 }
+
 #header {
     border-bottom: solid 1px black;
     background-color: #efefef;
@@ -10,8 +11,21 @@
     margin-bottom: 15px;
 }
 
+h1 {
+    font-family: Impact;
+    font-style: italic;
+    font-size: 32px;
+}
+
+button {
+    border: solid 1px black;
+    background-color: #ccc;
+    padding: 5px 15px;
+}
+
 #game {
     text-align:center;
+    border: solid 2px black;
 }
 
 #footer > button {
@@ -25,9 +39,10 @@
 .cell {
     width: 10px;
     height: 10px;
-    border: 1px solid black;
+    border: 1px solid #ccc;
+    border-collapse: collapse;
 }
 
 .cell.alive {
-    background-color: lime;
+    background-color: darkgreen;
 }
