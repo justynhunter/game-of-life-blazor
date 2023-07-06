@@ -1,6 +1,8 @@
 ﻿using System.Dynamic;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
+using System.Text;
+using System;
 
 namespace GameOfLife.Models
 {
@@ -12,6 +14,7 @@ namespace GameOfLife.Models
         public bool Paused { get; private set; }
         public event Func<Task>? OnChangeAsync;
         public bool[,] CurrentState { get; set; }
+        public string Seed { get; private set; }
         
         public Game(int width, int heigth)
         {
@@ -20,14 +23,41 @@ namespace GameOfLife.Models
             var state = new bool[width, heigth];
 
             var ranGen = new Random();
+            var boardSeed = new List<int>();
             for (int x = 0; x < width; x++)
             {
                 for (int y = 0; y < heigth; y++)
                 {
-                    state[x, y] = ranGen.Next(100) <= 20;
+                    var isAlive = ranGen.Next(100) <= 20;
+                    state[x, y] = isAlive;
+                    boardSeed.Add(isAlive ? 1 : 0);
                 }
             }
 
+            Seed = EncodeBase64($"{width}:{heigth}:{string.Join("", boardSeed)}");
+            CurrentState = state;
+        }
+
+        public Game(string seed)
+        {
+            Paused = false;
+
+            var (width, height, board) = DecodeSeed(seed);
+
+            var state = new bool[width, height];
+            var idx = 0;
+
+            for (int x = 0; x < width; x++)
+            {
+                for (int y = 0; y < height; y++)
+                {
+                    var isAlive = board[idx] == 1;
+                    state[x, y] = isAlive;
+                    idx++;
+                }
+            }
+
+            Seed = seed;
             CurrentState = state;
         }
 
@@ -50,6 +80,30 @@ namespace GameOfLife.Models
         }
 
         public void TogglePaused() => Paused = !Paused;
+
+        private static string EncodeBase64(string s)
+        {
+            var bytes = Encoding.UTF8.GetBytes(s);
+            return Convert.ToBase64String(bytes);
+        }
+
+        private static string DecodeBase64(string s)
+        {
+            var bytes = Convert.FromBase64String(s);
+            return Encoding.UTF8.GetString(bytes);
+        }
+
+        private static (int Width, int Height, char[] Board) DecodeSeed(string seed)
+        {
+            var b64 = DecodeBase64(seed);
+            var parts = b64.Split(':');
+
+            int width, height;
+            if (parts.Count() < 3 || !int.TryParse(parts[0], out width) || !int.TryParse(parts[1], out height))
+                throw new ArgumentException("Invalid Seed");
+
+            return (Width: width, Height: height, Board: parts[2].ToCharArray());
+        }
 
         private static bool GetNewCellState(int x, int y, bool[,] state)
         {

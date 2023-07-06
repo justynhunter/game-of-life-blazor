@@ -8,6 +8,12 @@
             <h1>Game of Life</h1>
         </div>
 
+        <div id="controls">
+            <p>
+                <label for="seed">Seed:</label> <input type="text" @bind-value="@_seed" /> <button @onclick="SeedClick">Start</button>
+            </p>
+        </div>
+
         <div id="gamne">
             @for (var y = 0; y != this.World.CurrentState.GetLength(1); ++y)
             {
@@ -35,9 +41,18 @@
 {
     [Inject]
     public Game World { get; set; }
+    private string _seed;
 
     protected override void OnInitialized()
     {
+        _seed = World.Seed;
+        World.OnChangeAsync += Refresh;
+        World.Run();
+    }
+
+    private void SeedClick(MouseEventArgs e)
+    {
+        World = new Game(_seed);
         World.OnChangeAsync += Refresh;
         World.Run();
     }
