@@ -24,7 +24,7 @@ namespace GameOfLife.Models
             {
                 for (int y = 0; y < heigth; y++)
                 {
-                    state[x, y] = ranGen.Next(100) <= 20;
+                    state[x, y] = ranGen.Next(100) <= 35;
                 }
             }
 
