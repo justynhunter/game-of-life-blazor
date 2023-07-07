@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using GameOfLife.Models
+@inject IJSRuntime JsRuntime
 
 @if (null != this.World)
 {
@@ -31,15 +32,19 @@
     </div>
 }
 
-@code 
+@code
 {
     [Inject]
     public Game World { get; set; }
 
-    protected override void OnInitialized()
+    protected override async Task OnInitializedAsync()
     {
+        var dimension = await JsRuntime.InvokeAsync<WindowDimension>("getWindowDimensions");
+
+        World = new Game(dimension.Width / 15, dimension.Height / 15 - 5);
         World.OnChangeAsync += Refresh;
         World.Run();
+        await Refresh();
     }
 
     private void TogglePause(MouseEventArgs e)
@@ -55,5 +60,11 @@
     public void Dispose()
     {
         World.OnChangeAsync -= Refresh;
+    }
+
+    public class WindowDimension
+    {
+        public int Width { get; set; }
+        public int Height { get; set; }
     }
 }
