@@ -1,4 +1,4 @@
-﻿using System.Dynamic;
+using System.Dynamic;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 
@@ -7,7 +7,7 @@ namespace GameOfLife.Models
  
     public class Game
     {
-        private int _refreshDelay = 500;
+        private const int REFRESH_DELAY = 500;
         
         public bool Paused { get; private set; }
         public event Func<Task>? OnChangeAsync;
@@ -44,7 +44,7 @@ namespace GameOfLife.Models
                         OnChangeAsync?.Invoke();
                     }
 
-                    await Task.Delay(_refreshDelay);
+                    await Task.Delay(REFRESH_DELAY);
                 }
             });
         }
