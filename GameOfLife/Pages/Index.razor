@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using GameOfLife.Models
 @inject IJSRuntime JsRuntime
+@inject NavigationManager NavManager
 
 @if (null != this.World)
 {
@@ -28,6 +29,20 @@
             <p>
                 <button @onclick="TogglePause">@(this.World.Paused ? "Play" : "Pause")</button>
             </p>
+            <div>
+                <label for="width">Width:</label>
+                <input id="width" type="text" @bind="Width" />
+            </div>
+
+            <div>
+                <label for="height">Height:</label>
+                <input id="height" type="text" @bind="Height" />
+            </div>
+            <div>
+                <label for="seed">Seed:</label>
+                <input id="seed" type="text" @bind="Seed" />
+            </div>
+            <button @onclick="StartNew">Start Over</button>
         </div>
     </div>
 }
@@ -37,11 +52,31 @@
     [Inject]
     public Game World { get; set; }
 
+    [Parameter, SupplyParameterFromQuery(Name = "seed")]
+    public int? Seed { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "w")]
+    public int? Width { get; set; }
+
+    [Parameter, SupplyParameterFromQuery(Name = "h")]
+    public int? Height { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
-        var dimension = await JsRuntime.InvokeAsync<WindowDimension>("getWindowDimensions");
+        if (!Width.HasValue) {
+            Width = 25;
+        }
 
-        World = new Game(dimension.Width / 15, dimension.Height / 15 - 5);
+        if (!Height.HasValue) {
+            Height = 25;
+        }
+
+        if (!Seed.HasValue) {
+            Seed = Environment.TickCount;
+        }
+        NavManager.NavigateTo($"/?w={Width}&h={Height}&seed={Seed}");
+
+        World = Game.CreateGame(Width.Value, Height.Value, Seed.Value);
         World.OnChangeAsync += Refresh;
         World.Run();
         await Refresh();
@@ -50,6 +85,27 @@
     private void TogglePause(MouseEventArgs e)
     {
         this.World.TogglePaused();
+    }
+
+    private void StartNew(MouseEventArgs e)
+    {
+        if (!Width.HasValue)
+        {
+            Width = 25;
+        }
+
+        if (!Height.HasValue)
+        {
+            Height = 25;
+        }
+
+        if (!Seed.HasValue) {
+            Seed = Environment.TickCount;
+        }
+
+        NavManager.NavigateTo($"/?w={Width}&h={Height}&seed={Seed}");
+        World = Game.CreateGame(Width.Value, Height.Value, Seed.Value);
+        World.Run();
     }
 
     private async Task Refresh()

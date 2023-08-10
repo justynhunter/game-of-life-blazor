@@ -1,4 +1,4 @@
-using System.Dynamic;
+﻿using System.Dynamic;
 using System.Security.Cryptography.X509Certificates;
 using System.Linq;
 
@@ -10,19 +10,23 @@ namespace GameOfLife.Models
         private const int REFRESH_DELAY = 500;
         
         public bool Paused { get; private set; }
-        public event Func<Task>? OnChangeAsync;
         public bool[,] CurrentState { get; set; }
-        
-        public Game(int width, int heigth)
+        public int Seed { get; }
+        public event Func<Task>? OnChangeAsync;
+
+        public static Game CreateGame(int width, int height, int seed)
+            => new(width, height, seed);
+
+        private Game(int width, int height, int seed)
         {
             // initialize game
             Paused = false;
-            var state = new bool[width, heigth];
+            var state = new bool[width, height];
 
-            var ranGen = new Random();
+            var ranGen = new Random(seed);
             for (int x = 0; x < width; x++)
             {
-                for (int y = 0; y < heigth; y++)
+                for (int y = 0; y < height; y++)
                 {
                     state[x, y] = ranGen.Next(100) <= 35;
                 }
