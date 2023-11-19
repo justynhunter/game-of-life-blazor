@@ -50,7 +50,7 @@
 @code
 {
     [Inject]
-    public Game World { get; set; }
+    public Game? World { get; set; }
 
     [Parameter, SupplyParameterFromQuery(Name = "seed")]
     public int? Seed { get; set; }
@@ -84,7 +84,10 @@
 
     private void TogglePause(MouseEventArgs e)
     {
-        this.World.TogglePaused();
+        if (this.World != null)
+        {
+            this.World.TogglePaused();
+        }
     }
 
     private void StartNew(MouseEventArgs e)
@@ -115,7 +118,10 @@
 
     public void Dispose()
     {
-        World.OnChangeAsync -= Refresh;
+        if (this.World != null)
+        {
+            World.OnChangeAsync -= Refresh;
+        }
     }
 
     public class WindowDimension
