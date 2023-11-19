@@ -1,20 +1,17 @@
 ﻿
 namespace GameOfLife.Models
 {
- 
+
     public class Game
     {
         private const int REFRESH_DELAY = 500;
-        
+
         public bool Paused { get; private set; }
         public bool[,] CurrentState { get; set; }
         public int Seed { get; }
         public event Func<Task>? OnChangeAsync;
 
-        public static Game CreateGame(int width, int height, int seed)
-            => new(width, height, seed);
-
-        private Game(int width, int height, int seed)
+        public Game(int width, int height, int seed)
         {
             // initialize game
             Paused = false;
@@ -41,7 +38,7 @@ namespace GameOfLife.Models
                     if (!Paused)
                     {
                         // run turn and invoke event
-                        CurrentState = CurrentState.Select((x,y,_v) => GetNewCellState(x,y, CurrentState));;
+                        CurrentState = CurrentState.Select((x, y, current) => GetNewCellState(x, y, current, CurrentState)); ;
                         OnChangeAsync?.Invoke();
                     }
 
@@ -52,29 +49,29 @@ namespace GameOfLife.Models
 
         public void TogglePaused() => Paused = !Paused;
 
-        private static bool GetNewCellState(int x, int y, bool[,] state)
+        public static int DetermineCellState(int x, int y, bool[,] state)
         {
-            var determineCellState = (int x, int y, bool[,] state) =>
-            {
-                // return 0 for out of bounds coordinates
-                if (x < 0 || x >= state.GetLength(0) || y < 0 || y >= state.GetLength(1))
-                    return 0;
+            // return 0 for out of bounds coordinates
+            if (x< 0 || x >= state.GetLength(0) || y< 0 || y >= state.GetLength(1))
+                return 0;
 
-                return state[x, y] ? 1 : 0;
-            };
+            return state[x, y]? 1 : 0;
+        }
 
+        public static bool GetNewCellState(int x, int y, bool current, bool[,] state)
+        {
             // count number of living neighbors
-            var liveNeighbors = determineCellState(x - 1, y, state)
-                + determineCellState(x - 1, y + 1, state)
-                + determineCellState(x, y + 1, state)
-                + determineCellState(x + 1, y + 1, state)
-                + determineCellState(x + 1, y, state)
-                + determineCellState(x + 1, y - 1, state)
-                + determineCellState(x, y - 1, state)
-                + determineCellState(x - 1, y - 1, state);
+            var liveNeighbors = DetermineCellState(x - 1, y, state)
+                + DetermineCellState(x - 1, y + 1, state)
+                + DetermineCellState(x, y + 1, state)
+                + DetermineCellState(x + 1, y + 1, state)
+                + DetermineCellState(x + 1, y, state)
+                + DetermineCellState(x + 1, y - 1, state)
+                + DetermineCellState(x, y - 1, state)
+                + DetermineCellState(x - 1, y - 1, state);
 
             // return new state of cell
-            return (state[x, y], liveNeighbors) switch
+            return (current, liveNeighbors) switch
             {
                 (true, < 2) => false,
                 (true, > 3) => false,

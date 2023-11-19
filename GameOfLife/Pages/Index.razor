@@ -49,7 +49,6 @@
 
 @code
 {
-    [Inject]
     public Game? World { get; set; }
 
     [Parameter, SupplyParameterFromQuery(Name = "seed")]
@@ -76,7 +75,7 @@
         }
         NavManager.NavigateTo($"/?w={Width}&h={Height}&seed={Seed}");
 
-        World = Game.CreateGame(Width.Value, Height.Value, Seed.Value);
+        World = new Game(Width.Value, Height.Value, Seed.Value);
         World.OnChangeAsync += Refresh;
         World.Run();
         await Refresh();
@@ -107,14 +106,11 @@
         }
 
         NavManager.NavigateTo($"/?w={Width}&h={Height}&seed={Seed}");
-        World = Game.CreateGame(Width.Value, Height.Value, Seed.Value);
+        World = new Game(Width.Value, Height.Value, Seed.Value);
         World.Run();
     }
 
-    private async Task Refresh()
-    {
-        await InvokeAsync(StateHasChanged);
-    }
+    private Task Refresh() => InvokeAsync(StateHasChanged);
 
     public void Dispose()
     {
