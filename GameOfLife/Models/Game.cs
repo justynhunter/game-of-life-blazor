@@ -1,7 +1,4 @@
-﻿using System.Dynamic;
-using System.Security.Cryptography.X509Certificates;
-using System.Linq;
-
+﻿
 namespace GameOfLife.Models
 {
  
@@ -44,7 +41,7 @@ namespace GameOfLife.Models
                     if (!Paused)
                     {
                         // run turn and invoke event
-                        CurrentState = RunTurn(CurrentState);
+                        CurrentState = CurrentState.Select((x,y,_v) => GetNewCellState(x,y, CurrentState));;
                         OnChangeAsync?.Invoke();
                     }
 
@@ -84,24 +81,6 @@ namespace GameOfLife.Models
                 (false, 3) => true,
                 _ => state[x, y]
             };
-        }
-
-        private static bool[,] RunTurn(bool[,] currentState)
-        {
-            var xLen = currentState.GetLength(0);
-            var yLen = currentState.GetLength(1);
-
-            var futureState = new bool[xLen, yLen];
-
-            for (int x = 0; x < xLen; x++) 
-            {
-                for (int y = 0; y < yLen; y++)
-                {
-                    futureState[x, y] = GetNewCellState(x, y, currentState);
-                }
-            }
-
-            return futureState;
         }
     }
 }
